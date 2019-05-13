@@ -4,20 +4,18 @@ import urllib
 
 df_data = pd.read_csv("docs/raw.csv")
 df_titles = df_data['Movie']
-df_year = df_data['Released']
+
+lst_imdb_ratings = []
+lst_imdb_votes = []
+lst_rotten_tomatoes = []
+lst_metacritic = []
 invalid_ascii = []
 invalid_link = []
-df_omdb = []
-assert len(df_titles) == len(df_year)
 
-'''for title,year in zip(df_titles,df_year):
-    data = pd.read_json("http://www.omdbapi.com/?t=" + title + "&y=" + str(year) + "&plot=short&r=json&apikey=4465fefc")
-    print(data)'''
-
-for i in range(1000, len(df_titles)):
+for i in range(len(df_titles)):
     
     print(i, df_titles[i])
-    link = "http://www.omdbapi.com/?t=" + str(df_titles[i]) + "&y="  + "&plot=short&r=json&apikey=4465fefc"
+    link = "http://www.omdbapi.com/?t=" + str(df_titles[i]) + "&rottentomatoes=true&metacritic=true&apikey=a968f1d9"
 
     # Parse movie titles to those in iMDB
     link = link.replace('Star Wars Ep. I: The Phantom Menace', 'Star Wars: Episode I - The Phantom Menace')
@@ -62,26 +60,58 @@ for i in range(1000, len(df_titles)):
     link = link.replace('The Chronicles of Narnia: The Voyage of the Daw…', 'The Chronicles of Narnia: The Voyage of the Dawn Treader')
     link = link.replace('The Naked Gun 2½: The Smell of Fear', 'The Naked Gun 2')
     link = link.replace('Teenage Mutant Ninja Turtles II: The Secret of …', 'Teenage Mutant Ninja Turtles II: The Secret of the Ooze')
-    link = link.replace('Garfield: The Movie', 'Garfield')
-    link = link.replace('Garfield: The Movie', 'Garfield')
-    link = link.replace('Garfield: The Movie', 'Garfield')
-    link = link.replace('Garfield: The Movie', 'Garfield')
-    
+    link = link.replace('Barnyard: The Original Party Animals', 'Barnyard')
+
     link = link.replace(' ', '%20')
     print(link)
 
     try:
-        df_omdb.append(pd.read_json(link))
+        movie_data = pd.read_json(link)
+        # IMDb
+        print("IMDb rating:", movie_data.loc[0, 'imdbRating'])
+        print("IMDb vote count:", movie_data.loc[0, 'imdbVotes'])
+        lst_imdb_ratings.append(movie_data.loc[0, 'imdbRating'])
+        lst_imdb_votes.append(movie_data.loc[0, 'imdbVotes'])
+        # Rotten Tomatoes (str)
+        if any(d['Source'] == 'Rotten Tomatoes' for d in movie_data['Ratings']):
+            for d in movie_data['Ratings']:
+                if d['Source'] == 'Rotten Tomatoes':
+                    rTomatoes_rating = d['Value']
+                    break
+            print("Rotten Tomatoes: ", rTomatoes_rating)
+            lst_rotten_tomatoes.append(rTomatoes_rating)
+        else:
+            print("Rotten Tomatoes: ", None)
+            lst_rotten_tomatoes.append(None)
+        # Metacritic (str)
+        if any(d['Source'] == 'Metacritic' for d in movie_data['Ratings']):
+            for d in movie_data['Ratings']:
+                if d['Source'] == 'Metacritic':
+                    metacritic_rating = d['Value']
+                    break
+            print("Metacritic: ", metacritic_rating)
+            lst_metacritic.append(metacritic_rating)
+        else:
+            print("Metacritic: ", None)
+            lst_metacritic.append(None)
     except urllib.error.HTTPError as e: 
         ResponseData = ''
         invalid_link.append(str(df_titles[i]))
     except UnicodeEncodeError as e_2:
         invalid_ascii.append(str(df_titles[i]))
-        
-print("\nINVALID LINKS")
-print (invalid_link)
-print (len(invalid_link))
 
-print("\nINVALID ASCII")
-print (invalid_ascii)
-print (len(invalid_ascii))
+assert not invalid_ascii
+assert not invalid_link
+
+assert len(lst_imdb_ratings) == len(lst_imdb_votes)
+assert len(lst_imdb_votes) == len(lst_metacritic)
+assert len(lst_metacritic) == len(lst_rotten_tomatoes)
+assert len(lst_rotten_tomatoes) == len(df_titles)
+
+df_data['IMDb Ratings'] = lst_imdb_ratings # int
+df_data['IMDB Votes'] = lst_imdb_votes # int
+df_data['Metacritic'] = lst_metacritic # string
+df_data['Rotten Tomatoes'] = lst_rotten_tomatoes # string
+
+# Uncomment to generate new one
+#df_data.to_csv('omdb_raw.csv')
