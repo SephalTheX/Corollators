@@ -5,7 +5,8 @@ import urllib
 df_data = pd.read_csv("docs/raw.csv")
 df_titles = df_data['Movie']
 df_year = df_data['Released']
-wrong_names = []
+invalid_ascii = []
+invalid_link = []
 df_omdb = []
 assert len(df_titles) == len(df_year)
 
@@ -13,7 +14,7 @@ assert len(df_titles) == len(df_year)
     data = pd.read_json("http://www.omdbapi.com/?t=" + title + "&y=" + str(year) + "&plot=short&r=json&apikey=4465fefc")
     print(data)'''
 
-for i in range(175, len(df_titles)):
+for i in range(1000, len(df_titles)):
     
     print(i, df_titles[i])
     link = "http://www.omdbapi.com/?t=" + str(df_titles[i]) + "&y="  + "&plot=short&r=json&apikey=4465fefc"
@@ -56,6 +57,15 @@ for i in range(175, len(df_titles)):
     link = link.replace('Artificial Intelligence: AI', 'A.I. Artificial Intelligence')
     link = link.replace('La marche de l\'empereur', 'March of the Penguins')
     link = link.replace('Garfield: The Movie', 'Garfield')
+    link = link.replace('Pirates of the Caribbean: The Curse of the Blac…', 'Pirates of the Caribbean: The Curse of the Black Pearl')
+    link = link.replace('The Chronicles of Narnia: The Lion, the Witch a…', 'The Chronicles of Narnia: The Lion, the Witch and the Wardrobe')
+    link = link.replace('The Chronicles of Narnia: The Voyage of the Daw…', 'The Chronicles of Narnia: The Voyage of the Dawn Treader')
+    link = link.replace('The Naked Gun 2½: The Smell of Fear', 'The Naked Gun 2')
+    link = link.replace('Teenage Mutant Ninja Turtles II: The Secret of …', 'Teenage Mutant Ninja Turtles II: The Secret of the Ooze')
+    link = link.replace('Garfield: The Movie', 'Garfield')
+    link = link.replace('Garfield: The Movie', 'Garfield')
+    link = link.replace('Garfield: The Movie', 'Garfield')
+    link = link.replace('Garfield: The Movie', 'Garfield')
     
     link = link.replace(' ', '%20')
     print(link)
@@ -64,17 +74,14 @@ for i in range(175, len(df_titles)):
         df_omdb.append(pd.read_json(link))
     except urllib.error.HTTPError as e: 
         ResponseData = ''
-        #df_omdb.append({})
-        wrong_names.append(str(df_titles[i]))
+        invalid_link.append(str(df_titles[i]))
     except UnicodeEncodeError as e_2:
-        wrong_names.append(str(df_titles[i]))
-    # print(df_omdb)
-print (wrong_names)
-print (len(wrong_names))
+        invalid_ascii.append(str(df_titles[i]))
+        
+print("\nINVALID LINKS")
+print (invalid_link)
+print (len(invalid_link))
 
-#test = "http://www.omdbapi.com/?t=" + df_titles[1] + "&y=" + str(df_year[1]) + "&type=movie&r=json&ratings=true" + "&apikey=4465fefc"
-#"http://www.omdbapi.com/?t=Avatar&y=&plot=short&r=json&apikey=4465fefc"
-#test2 = pd.read_json(test)
-#print(test)
-#print(test2)
-#print(df_year)
+print("\nINVALID ASCII")
+print (invalid_ascii)
+print (len(invalid_ascii))
