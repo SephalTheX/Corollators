@@ -2,13 +2,15 @@ import pandas as pd
 import numpy as np
 import urllib
 
-df_data = pd.read_csv("docs/raw.csv")
+df_data = pd.read_csv("../data/raw.csv")
 df_titles = df_data['Movie']
 
 lst_imdb_ratings = []
 lst_imdb_votes = []
 lst_rotten_tomatoes = []
 lst_metacritic = []
+lst_released = []
+lst_genre = []
 invalid_ascii = []
 invalid_link = []
 
@@ -72,6 +74,8 @@ for i in range(len(df_titles)):
         print("IMDb vote count:", movie_data.loc[0, 'imdbVotes'])
         lst_imdb_ratings.append(movie_data.loc[0, 'imdbRating'])
         lst_imdb_votes.append(movie_data.loc[0, 'imdbVotes'])
+        lst_released.append(movie_data.loc[0, 'Released'])
+        lst_genre.append(movie_data.loc[0, 'Genre'])
         # Rotten Tomatoes (str)
         if any(d['Source'] == 'Rotten Tomatoes' for d in movie_data['Ratings']):
             for d in movie_data['Ratings']:
@@ -107,11 +111,15 @@ assert len(lst_imdb_ratings) == len(lst_imdb_votes)
 assert len(lst_imdb_votes) == len(lst_metacritic)
 assert len(lst_metacritic) == len(lst_rotten_tomatoes)
 assert len(lst_rotten_tomatoes) == len(df_titles)
+assert len(lst_released) == len(df_titles)
+assert len(lst_genre) == len(df_titles)
 
 df_data['IMDb Ratings'] = lst_imdb_ratings # int
 df_data['IMDB Votes'] = lst_imdb_votes # int
 df_data['Metacritic'] = lst_metacritic # string
 df_data['Rotten Tomatoes'] = lst_rotten_tomatoes # string
+df_data['Released Month'] = lst_released 
+df_data['Genre'] = lst_genre
 
 # Uncomment to generate new one
-#df_data.to_csv('omdb_raw.csv')
+df_data.to_csv('../data/omdb_joined.csv')
