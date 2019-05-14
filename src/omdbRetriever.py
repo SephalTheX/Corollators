@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 import urllib
 
-df_data = pd.read_csv('/Users/amirmatkamal/COGS108_Spring_2019/Corollators/data/raw.csv')
+df_data = pd.read_csv('../data/raw.csv')
 df_titles = df_data['Movie']
+df_years = df_data['Released']
 
 lst_imdb_ratings = []
 lst_imdb_votes = []
@@ -15,10 +16,32 @@ invalid_ascii = []
 invalid_link = []
 
 for i in range(len(df_titles)):
-    
-    print(i, df_titles[i])
-    link = "http://www.omdbapi.com/?t=" + str(df_titles[i]) + "&rottentomatoes=true&metacritic=true&apikey=a968f1d9"
+    year = str(df_years[i])
+    title = str(df_titles[i])
+    # hardcode fixs
+    if (str(df_titles[i]) == "Porky's"):
+        year = "1981"
+    elif (str(df_titles[i]) == "The Upside"):
+        year = "2017"
+    elif (str(df_titles[i]) == "Superman II"):
+        year = "1980"
+    elif (str(df_titles[i]) == "Paranormal Activity"):
+        year = "2007"
+    elif (str(df_titles[i]) == "Taken 3"):
+        year = "2014"
+    elif (str(df_titles[i]) == "Pokemon: The First Movie"):
+        year = "1998"
+        title = "Pokemon%3A+The+First+Movie"
+    elif (str(df_titles[i]) == "Blade 2"):
+        year = "2001"
+    elif (str(df_titles[i]) == "Paddington"):
+        year = "2014"
+    elif (str(df_titles[i]) == "Michael Jackson's This Is It"):
+        year = "2010"
 
+    # print(i, df_titles[i])
+    link = "http://www.omdbapi.com/?t=" + title + "&y=" + year + "&rottentomatoes=true&metacritic=true&apikey=a968f1d9"
+    
     # Parse movie titles to those in iMDB
     link = link.replace('Star Wars Ep. I: The Phantom Menace', 'Star Wars: Episode I - The Phantom Menace')
     link = link.replace('Star Wars Ep. II: Attack of the Clones', 'Star Wars: Episode II - Attack of the Clones')
@@ -45,7 +68,6 @@ for i in range(len(df_titles)):
     link = link.replace('Crocodile Dundee 2', 'Crocodile Dundee II')
     link = link.replace('The Conjuring 2: The Enfield Poltergeist', 'The Conjuring 2')
     link = link.replace('Jackass Presents: Bad Grandpa', 'Bad Grandpa')
-    link = link.replace('Cowboys and Aliens', 'Cowboys & Aliens')
     link = link.replace('Gnomeo and Juliet', 'Gnomeo & Juliet')
     link = link.replace('John Wick: Chapter Two', 'John Wick: Chapter 2')
     link = link.replace('Prince of Persia: Sands of Time', 'Prince of Persia: The Sands of Time')
@@ -64,14 +86,24 @@ for i in range(len(df_titles)):
     link = link.replace('Teenage Mutant Ninja Turtles II: The Secret of …', 'Teenage Mutant Ninja Turtles II: The Secret of the Ooze')
     link = link.replace('Barnyard: The Original Party Animals', 'Barnyard')
 
-    link = link.replace(' ', '%20')
-    print(link)
 
+    # hardcode fixs
+    # if (str(df_titles[i]) == "Fast & Furious" or str(df_titles[i]) == "Les Miserables"):
+    #     link = link.replace(' ', '+%26')
+    # if (str(df_titles[i]) == "Cowboys & Aliens" or str(df_titles[i]) == "Les Miserables"):
+    #     link = link.replace(' ', '+%26')
+    if ("&" in str(df_titles[i]) or str(df_titles[i]) == "Les Miserables"):
+        link = link.replace(' ', '+%26')
+    else:
+        link = link.replace(' ', '+')
+
+    # print(link)
+    print(str(df_titles[i]), str(df_years[i]))
     try:
         movie_data = pd.read_json(link)
         # IMDb
-        print("IMDb rating:", movie_data.loc[0, 'imdbRating'])
-        print("IMDb vote count:", movie_data.loc[0, 'imdbVotes'])
+        # print("IMDb rating:", movie_data.loc[0, 'imdbRating'])
+        # print("IMDb vote count:", movie_data.loc[0, 'imdbVotes'])
         lst_imdb_ratings.append(movie_data.loc[0, 'imdbRating'])
         lst_imdb_votes.append(movie_data.loc[0, 'imdbVotes'])
         lst_released.append(movie_data.loc[0, 'Released'])
@@ -82,10 +114,10 @@ for i in range(len(df_titles)):
                 if d['Source'] == 'Rotten Tomatoes':
                     rTomatoes_rating = d['Value']
                     break
-            print("Rotten Tomatoes: ", rTomatoes_rating)
+            # print("Rotten Tomatoes: ", rTomatoes_rating)
             lst_rotten_tomatoes.append(rTomatoes_rating)
         else:
-            print("Rotten Tomatoes: ", None)
+            # print("Rotten Tomatoes: ", None)
             lst_rotten_tomatoes.append(None)
         # Metacritic (str)
         if any(d['Source'] == 'Metacritic' for d in movie_data['Ratings']):
@@ -93,10 +125,10 @@ for i in range(len(df_titles)):
                 if d['Source'] == 'Metacritic':
                     metacritic_rating = d['Value']
                     break
-            print("Metacritic: ", metacritic_rating)
+            # print("Metacritic: ", metacritic_rating)
             lst_metacritic.append(metacritic_rating)
         else:
-            print("Metacritic: ", None)
+            # print("Metacritic: ", None)
             lst_metacritic.append(None)
     except urllib.error.HTTPError as e: 
         ResponseData = ''
@@ -122,4 +154,4 @@ df_data['Released Month'] = lst_released
 df_data['Genre'] = lst_genre
 
 # Uncomment to generate new one
-df_data.to_csv('data/omdb_joined.csv')
+df_data.to_csv('../data/omdb_joined.csv')
