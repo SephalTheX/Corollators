@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import urllib
 
-df_data = pd.read_csv("../data/raw.csv")
+df_data = pd.read_csv('/Users/amirmatkamal/COGS108_Spring_2019/Corollators/data/raw.csv')
 df_titles = df_data['Movie']
 
 lst_imdb_ratings = []
@@ -26,7 +26,7 @@ for i in range(len(df_titles)):
     link = link.replace('Star Wars Ep. IV: A New Hope', 'Star Wars: Episode IV - A New Hope')
     link = link.replace('Star Wars Ep. V: The Empire Strikes Back', 'Star Wars: Episode V - The Empire Strikes Back')
     link = link.replace('Star Wars Ep. VI: Return of the Jedi', 'Star Wars: Episode VI - Return of the Jedi')
-    link = link.replace('Star Wars Ep. VII: The Force Awakens', 'Star Wars: Episode VII - The Force Awakens')
+    link = link.replace('Star Wars Ep. VII: The Force Awakens', 'The Force Awakens')
     link = link.replace('Star Wars Ep. VIII: The Last Jedi', 'Star Wars: The Last Jedi')
     link = link.replace('Harry Potter and the Deathly Hallows: Part II', 'Harry Potter and the Deathly Hallows: Part 2')
     link = link.replace('Harry Potter and the Deathly Hallows: Part I', 'Harry Potter and the Deathly Hallows: Part 1')
@@ -122,4 +122,4 @@ df_data['Released Month'] = lst_released
 df_data['Genre'] = lst_genre
 
 # Uncomment to generate new one
-df_data.to_csv('../data/omdb_joined.csv')
+df_data.to_csv('data/omdb_joined.csv')
